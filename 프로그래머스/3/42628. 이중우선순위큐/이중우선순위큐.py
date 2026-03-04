@@ -1,33 +1,44 @@
 from heapq import *
+from collections import *
 
 def solution(operations):
+    valid = defaultdict(int)
     
-    nums = []
+    l = 0
+    min_heap = []
+    max_heap = []
     
     for op in operations:
-        x, y= op.split()
-        if x == 'I':
-            nums.append(int(y))
+        cmd, val = op.split()
+        
+        if cmd == 'I':
+            num = int(val)
+            heappush(min_heap, num)
+            heappush(max_heap, -num)
+            valid[num] += 1
+            l += 1
         else:
-            if not nums: continue
-            
-            if y == '1':
-                for i in range(len(nums)):
-                    nums[i] = -nums[i]
-                heapify(nums)
-                heappop(nums)
-                for i in range(len(nums)):
-                    nums[i] = -nums[i]
+            if l == 0: continue
+            if val == '1':
+                num = -heappop(max_heap)
+                while valid[num]==0:
+                    num = -heappop(max_heap)
+                l -= 1
+                valid[num] -= 1
             else:
-                heapify(nums)
-                heappop(nums)
-    if not nums:
+                num = heappop(min_heap)
+                while valid[num]==0:
+                    num = heappop(min_heap)
+                l -= 1
+                valid[num] -= 1
+                
+    if l==0:
         return [0, 0]
-    heapify(nums)
-    n1 = nums[0]
-    for i in range(len(nums)):
-        nums[i] = -nums[i]
-    heapify(nums)
-    n2 = -nums[0]
-    
-    return [n2, n1]
+        
+    M = -heappop(max_heap)
+    while valid[M] == 0:
+        M = -heappop(max_heap)
+    m = heappop(min_heap)
+    while valid[m] == 0:
+        m = heappop(min_heap)
+    return [M, m]
